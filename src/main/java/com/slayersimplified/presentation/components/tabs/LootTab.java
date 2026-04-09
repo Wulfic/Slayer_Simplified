@@ -1,0 +1,267 @@
+package com.slayersimplified.presentation.components.tabs;
+
+import com.slayersimplified.domain.Tab;
+import com.slayersimplified.loot.DropTableSection;
+import com.slayersimplified.loot.WikiItem;
+import com.slayersimplified.loot.WikiScraper;
+import com.slayersimplified.presentation.components.ScrollBarStyling;
+import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.ui.FontManager;
+import okhttp3.OkHttpClient;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.text.NumberFormat;
+
+/**
+ * Tab that displays the loot/drop table for a monster by scraping the OSRS Wiki.
+ * Automatically looks up the selected monster and displays all drop sections
+ * in a scrollable list.
+ */
+@Slf4j
+public class LootTab extends JScrollPane implements Tab<String>
+{
+    private final OkHttpClient okHttpClient;
+    private final JPanel contentPanel = new JPanel();
+    private String currentMonster;
+
+    private static final Color SECTION_HEADER_BG = ColorScheme.DARKER_GRAY_COLOR.darker();
+    private static final Color ITEM_BG = ColorScheme.DARKER_GRAY_COLOR;
+    private static final Color ITEM_BG_ALT = new Color(
+            ITEM_BG.getRed() + 5, ITEM_BG.getGreen() + 5, ITEM_BG.getBlue() + 5);
+
+    private static final Color RARITY_COMMON = Color.WHITE;
+    private static final Color RARITY_RARE = ColorScheme.BRAND_ORANGE.brighter();
+    private static final Color RARITY_SUPER_RARE = new Color(200, 50, 200);
+    private static final Color PRICE_COLOR = ColorScheme.GRAND_EXCHANGE_ALCH;
+
+    private final NumberFormat nf = NumberFormat.getNumberInstance();
+
+    public LootTab(OkHttpClient okHttpClient)
+    {
+        this.okHttpClient = okHttpClient;
+
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
+        setViewportView(contentPanel);
+        setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        setBorder(null);
+        getVerticalScrollBar().setUnitIncrement(16);
+        setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+        ScrollBarStyling.apply(this);
+    }
+
+    @Override
+    public void update(String monsterName)
+    {
+        if (monsterName == null || monsterName.isEmpty())
+        {
+            return;
+        }
+
+        // Don't re-fetch if same monster
+        if (monsterName.equals(currentMonster))
+        {
+            return;
+        }
+        currentMonster = monsterName;
+
+        contentPanel.removeAll();
+        showLoadingState();
+
+        WikiScraper.getDropsByMonster(okHttpClient, monsterName)
+                .whenCompleteAsync((dropTableSections, ex) ->
+                {
+                    SwingUtilities.invokeLater(() ->
+                    {
+                        contentPanel.removeAll();
+
+                        if (ex != null || dropTableSections == null || dropTableSections.length == 0)
+                        {
+                            showEmptyState();
+                            return;
+                        }
+
+                        buildDropTables(dropTableSections);
+
+                        contentPanel.revalidate();
+                        contentPanel.repaint();
+                        revalidate();
+
+                        // Scroll to top
+                        SwingUtilities.invokeLater(() -> getVerticalScrollBar().setValue(0));
+                    });
+                });
+    }
+
+    @Override
+    public void shutDown()
+    {
+        contentPanel.removeAll();
+        currentMonster = null;
+    }
+
+    /**
+     * Force a re-fetch of the current monster's loot data.
+     */
+    public void refresh()
+    {
+        String name = currentMonster;
+        currentMonster = null;
+        if (name != null)
+        {
+            update(name);
+        }
+    }
+
+    private void showLoadingState()
+    {
+        JLabel loadingLabel = new JLabel("Loading loot table...");
+        loadingLabel.setFont(FontManager.getRunescapeSmallFont());
+        loadingLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+        loadingLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        loadingLabel.setBorder(new EmptyBorder(20, 10, 20, 10));
+        contentPanel.add(loadingLabel);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    private void showEmptyState()
+    {
+        JLabel emptyLabel = new JLabel("No loot data found.");
+        emptyLabel.setFont(FontManager.getRunescapeSmallFont());
+        emptyLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+        emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        emptyLabel.setBorder(new EmptyBorder(20, 10, 20, 10));
+        contentPanel.add(emptyLabel);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    private void buildDropTables(DropTableSection[] sections)
+    {
+        for (DropTableSection section : sections)
+        {
+            if (section.getTable() == null || section.getTable().isEmpty())
+            {
+                continue;
+            }
+
+            for (var entry : section.getTable().entrySet())
+            {
+                String subHeader = entry.getKey();
+                WikiItem[] items = entry.getValue();
+
+                // Section header
+                JPanel headerPanel = createSectionHeader(subHeader);
+                contentPanel.add(headerPanel);
+
+                // Items
+                for (int i = 0; i < items.length; i++)
+                {
+                    JPanel itemRow = createItemRow(items[i], i % 2 == 1);
+                    contentPanel.add(itemRow);
+                }
+
+                contentPanel.add(Box.createRigidArea(new Dimension(0, 4)));
+            }
+        }
+    }
+
+    private JPanel createSectionHeader(String text)
+    {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(SECTION_HEADER_BG);
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+        panel.setBorder(new EmptyBorder(4, 8, 4, 4));
+
+        JLabel label = new JLabel(text);
+        label.setFont(FontManager.getRunescapeBoldFont());
+        label.setForeground(ColorScheme.BRAND_ORANGE);
+        panel.add(label, BorderLayout.WEST);
+
+        return panel;
+    }
+
+    private JPanel createItemRow(WikiItem item, boolean alt)
+    {
+        JPanel row = new JPanel(new BorderLayout(4, 0));
+        row.setBackground(alt ? ITEM_BG_ALT : ITEM_BG);
+        row.setBorder(new EmptyBorder(3, 8, 3, 4));
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+
+        // Left: name + quantity
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        leftPanel.setOpaque(false);
+
+        String displayName = item.getName();
+        if (displayName.length() > 22)
+        {
+            displayName = displayName.substring(0, 20) + "...";
+        }
+
+        JLabel nameLabel = new JLabel(displayName);
+        nameLabel.setFont(FontManager.getRunescapeBoldFont());
+        nameLabel.setForeground(Color.WHITE);
+        if (!displayName.equals(item.getName()))
+        {
+            nameLabel.setToolTipText(item.getName());
+        }
+        leftPanel.add(nameLabel);
+
+        String qtyText = item.getQuantityLabelText();
+        if (!qtyText.isEmpty())
+        {
+            JLabel qtyLabel = new JLabel(qtyText);
+            qtyLabel.setFont(FontManager.getRunescapeSmallFont());
+            qtyLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+            leftPanel.add(qtyLabel);
+        }
+
+        // Right: rarity + price
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+        rightPanel.setOpaque(false);
+
+        JLabel rarityLabel = new JLabel(item.getRarityLabelText());
+        rarityLabel.setFont(FontManager.getRunescapeSmallFont());
+        rarityLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        rarityLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        rarityLabel.setForeground(getRarityColor(item));
+        rightPanel.add(rarityLabel);
+
+        String priceText = item.getPriceLabelText();
+        if (!priceText.isEmpty())
+        {
+            JLabel priceLabel = new JLabel(priceText);
+            priceLabel.setFont(FontManager.getRunescapeSmallFont());
+            priceLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            priceLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+            priceLabel.setForeground(PRICE_COLOR);
+            rightPanel.add(priceLabel);
+        }
+
+        row.add(leftPanel, BorderLayout.WEST);
+        row.add(rightPanel, BorderLayout.EAST);
+
+        // Tooltip with full info
+        row.setToolTipText(String.format("%s — %s — %s",
+                item.getName(), item.getQuantityLabelText(), item.getRarityLabelText()));
+
+        return row;
+    }
+
+    private Color getRarityColor(WikiItem item)
+    {
+        if (item.getRarity() > 0)
+        {
+            if (item.getRarity() <= 0.001) return RARITY_SUPER_RARE;
+            if (item.getRarity() <= 0.01) return RARITY_RARE;
+        }
+        return RARITY_COMMON;
+    }
+}

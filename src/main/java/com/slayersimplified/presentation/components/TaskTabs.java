@@ -1,0 +1,142 @@
+/*
+ * BSD 2-Clause License
+ * Copyright (c) 2022, Lee (original Slayer Assistant plugin)
+ * Copyright (c) 2026, Slayer Simplified contributors
+ * See LICENSE for details.
+ *
+ * MODIFIED from original: LOCATIONS tab now uses LocationsTab (with navigate
+ * buttons) instead of the plain TextTab.
+ */
+package com.slayersimplified.presentation.components;
+
+import com.slayersimplified.domain.Icon;
+import com.slayersimplified.domain.Tab;
+import com.slayersimplified.domain.TabKey;
+import com.slayersimplified.domain.Task;
+import com.slayersimplified.presentation.components.tabs.InfoTab;
+import com.slayersimplified.presentation.components.tabs.LocationsTab;
+import com.slayersimplified.presentation.components.tabs.LootTab;
+import com.slayersimplified.presentation.components.tabs.NotesTab;
+import com.slayersimplified.presentation.components.tabs.WikiTab;
+import com.slayersimplified.services.FavoriteLocationService;
+import com.slayersimplified.services.LocationCoordinateService;
+import com.slayersimplified.services.MonsterNotesService;
+import com.slayersimplified.services.NavigationService;
+import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.ui.laf.RuneLiteTabbedPaneUI;
+import okhttp3.OkHttpClient;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Tabbed pane containing the task detail tabs.
+ * The Locations tab uses a NavigationService-aware LocationsTab with
+ * favorite star toggles and "Nav" buttons.
+ */
+@Slf4j
+public class TaskTabs extends JTabbedPane
+{
+    private final Map<TabKey, Tab<?>> tabMap = new HashMap<>();
+    private final LocationsTab locationsTab;
+    private final LootTab lootTab;
+    private final InfoTab infoTab;
+
+    /**
+     * @param navigationService         service for sending path requests to Shortest Path
+     * @param locationCoordinateService service for resolving location names to WorldPoints
+     * @param favoriteService           service for persisting favorite locations
+     * @param okHttpClient              HTTP client for wiki lookups
+     * @param notesService              service for persisting monster notes
+     */
+    public TaskTabs(
+            NavigationService navigationService,
+            LocationCoordinateService locationCoordinateService,
+            FavoriteLocationService favoriteService,
+            OkHttpClient okHttpClient,
+            MonsterNotesService notesService)
+    {
+        setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        setUI(new RuneLiteTabbedPaneUI()
+        {
+            @Override
+            protected int calculateTabWidth(int tabPlacement, int tabIndex, FontMetrics metrics)
+            {
+                return getWidth() / getTabCount();
+            }
+        });
+
+        TabKey locations = TabKey.LOCATIONS;
+        TabKey info = TabKey.INFO;
+        TabKey wiki = TabKey.WIKI;
+        TabKey loot = TabKey.LOOT;
+        TabKey notes = TabKey.NOTES;
+
+        locationsTab = new LocationsTab(navigationService, locationCoordinateService, favoriteService);
+        lootTab = new LootTab(okHttpClient);
+        infoTab = new InfoTab(okHttpClient);
+
+        setTab(locations, Icon.COMPASS.getIcon(), locationsTab, locations.getName());
+        setTab(info, Icon.INVENTORY.getIcon(), infoTab, info.getName());
+        setTab(loot, Icon.LOOT.getIcon(), lootTab, loot.getName());
+        setTab(notes, Icon.NOTES.getIcon(), new NotesTab(notesService), notes.getName());
+        setTab(wiki, Icon.WIKI.getIcon(), new WikiTab(), wiki.getName());
+    }
+
+    public void shutDown()
+    {
+        tabMap.values().forEach(Tab::shutDown);
+    }
+
+    /**
+     * Programmatically switch to the Locations tab.
+     */
+    public void selectLocationsTab()
+    {
+        int index = indexOfComponent((Component) tabMap.get(TabKey.LOCATIONS));
+        if (index >= 0)
+        {
+            setSelectedIndex(index);
+        }
+    }
+
+    public void update(Task task)
+    {
+        // Set the current monster name on LocationsTab before updating
+        locationsTab.setCurrentMonster(task.name);
+
+        updateTab(TabKey.LOCATIONS, task.locations);
+        updateTab(TabKey.INFO, new InfoTab.InfoData(
+                task.name,
+                task.itemsRequired,
+                new Object[][]{task.attackStyles, task.attributes},
+                task.masters));
+        updateTab(TabKey.WIKI, task.wikiLinks);
+        updateTab(TabKey.LOOT, task.name);
+        updateTab(TabKey.NOTES, task.name);
+    }
+
+    private <T> void updateTab(TabKey key, T data)
+    {
+        Tab<?> rawTab = tabMap.get(key);
+
+        if (rawTab == null)
+        {
+            log.error("No tab found with key {}", key.toString());
+            return;
+        }
+
+        @SuppressWarnings("unchecked")
+        Tab<T> tab = (Tab<T>) rawTab;
+        tab.update(data);
+    }
+
+    private void setTab(TabKey key, ImageIcon icon, Tab<?> tab, String tip)
+    {
+        tabMap.put(key, tab);
+        addTab(null, icon, (Component) tab, tip);
+    }
+}

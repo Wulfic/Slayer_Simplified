@@ -1,0 +1,168 @@
+/*
+ * BSD 2-Clause License
+ * Copyright (c) 2022, Lee (original Slayer Assistant plugin)
+ * Copyright (c) 2026, Slayer Simplified contributors
+ * See LICENSE for details.
+ *
+ * Main plugin entry point for Slayer Simplified. Extends the Slayer Assistant
+ * plugin with navigate-to-location functionality via the Shortest Path plugin's
+ * PluginMessage API. Tracks the current slayer task via chat message parsing
+ * and provides a Quick Navigate feature.
+ */
+package com.slayersimplified;
+
+import com.google.inject.Binder;
+import com.google.inject.Provides;
+import com.slayersimplified.domain.Icon;
+import com.slayersimplified.modules.TaskServiceModule;
+import com.slayersimplified.presentation.panels.MainPanel;
+import com.slayersimplified.services.SlayerTaskTracker;
+import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.ChatMessageType;
+import net.runelite.api.Client;
+import net.runelite.api.events.ChatMessage;
+import net.runelite.client.callback.ClientThread;
+import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.plugins.Plugin;
+import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.util.Text;
+
+import javax.inject.Inject;
+import javax.swing.SwingUtilities;
+
+@Slf4j
+@PluginDescriptor(
+        name = "Slayer Simplified",
+        description = "Slayer task assistant with Shortest Path navigation integration",
+        tags = {"slay", "slayer", "navigation", "path", "shortest"}
+)
+public class SlayerSimplifiedPlugin extends Plugin
+{
+    @Inject
+    private Client client;
+
+    @Inject
+    private ClientThread clientThread;
+
+    @Inject
+    private ClientToolbar clientToolbar;
+
+    @Inject
+    private MainPanel mainPanel;
+
+    @Inject
+    private SlayerTaskTracker taskTracker;
+
+    private NavigationButton navButton;
+
+    /** Set when the player types !task; cleared when the game response triggers navigation. */
+    private volatile boolean pendingTaskNavigation = false;
+
+    @Override
+    public void configure(Binder binder)
+    {
+        binder.install(new TaskServiceModule());
+    }
+
+    @Provides
+    SlayerSimplifiedConfig provideConfig(ConfigManager configManager)
+    {
+        return configManager.getConfig(SlayerSimplifiedConfig.class);
+    }
+
+    @Override
+    protected void startUp()
+    {
+        navButton = NavigationButton.builder()
+                .tooltip("Slayer Simplified")
+                .icon(Icon.SLAYER_SKILL.getImage())
+                .priority(10)
+                .panel(mainPanel)
+                .build();
+
+        clientToolbar.addNavigation(navButton);
+        log.info("Slayer Simplified started");
+    }
+
+    @Override
+    protected void shutDown()
+    {
+        clientToolbar.removeNavigation(navButton);
+        mainPanel.shutDown();
+        log.info("Slayer Simplified stopped");
+    }
+
+    @Subscribe
+    public void onChatMessage(ChatMessage event)
+    {
+        // Parse slayer-related game messages (task assignment, completion, etc.)
+        if (event.getType() == ChatMessageType.GAMEMESSAGE
+                || event.getType() == ChatMessageType.SPAM)
+        {
+            String rawMsg = event.getMessage();
+            if (rawMsg == null) return;
+            String message = Text.removeTags(rawMsg);
+            SlayerTaskTracker.ParseResult result = taskTracker.parseChatMessage(message);
+
+            // Auto-navigate when a new task is assigned
+            if (result == SlayerTaskTracker.ParseResult.NEW_TASK)
+            {
+                pendingTaskNavigation = false;
+                SwingUtilities.invokeLater(() -> mainPanel.quickNavigate());
+            }
+            // When game responds to !task with current task info, navigate now
+            else if (result == SlayerTaskTracker.ParseResult.CURRENT_TASK && pendingTaskNavigation)
+            {
+                pendingTaskNavigation = false;
+                SwingUtilities.invokeLater(() -> mainPanel.quickNavigate());
+            }
+            return;
+        }
+
+        // Listen for the player typing "!task" in public chat
+        if (event.getType() == ChatMessageType.PUBLICCHAT)
+        {
+            if (event.getName() == null || client.getLocalPlayer() == null)
+            {
+                return;
+            }
+
+            String sender = Text.sanitize(event.getName());
+            String localName = Text.sanitize(client.getLocalPlayer().getName());
+
+            if (localName != null && sender.equals(localName))
+            {
+                String rawMsg = event.getMessage();
+                if (rawMsg == null) return;
+                String message = Text.removeTags(rawMsg).trim();
+                if (message.equalsIgnoreCase("!task"))
+                {
+                    // Set flag so the GAMEMESSAGE response triggers navigation
+                    pendingTaskNavigation = true;
+
+                    // Fallback: if no matching game message arrives within 10 ticks,
+                    // try navigating with whatever task name is already stored
+                    Runnable fallback = () ->
+                    {
+                        if (pendingTaskNavigation)
+                        {
+                            pendingTaskNavigation = false;
+                            SwingUtilities.invokeLater(() -> mainPanel.quickNavigate());
+                        }
+                    };
+                    // Chain 10 invokeLater calls for ~10 tick delay
+                    Runnable chain = fallback;
+                    for (int i = 0; i < 9; i++)
+                    {
+                        final Runnable next = chain;
+                        chain = () -> clientThread.invokeLater(next);
+                    }
+                    clientThread.invokeLater(chain);
+                }
+            }
+        }
+    }
+}

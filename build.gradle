@@ -14,7 +14,7 @@ repositories {
 }
 
 def runeLiteVersion = 'latest.release'
-def pluginMainClass = 'com.slayernavigation.SlayerNavigationPluginTest'
+def pluginMainClass = 'com.slayersimplified.SlayerSimplifiedPluginTest'
 
 dependencies {
 	compileOnly group: 'net.runelite', name: 'client', version: runeLiteVersion
@@ -22,12 +22,15 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.30'
 	annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
+	// Jsoup for OSRS Wiki HTML parsing (loot table scraping)
+	implementation 'org.jsoup:jsoup:1.17.2'
+
 	testImplementation 'junit:junit:4.13.2'
 	testImplementation group: 'net.runelite', name: 'client', version: runeLiteVersion
 	testImplementation group: 'net.runelite', name: 'jshell', version: runeLiteVersion
 }
 
-group = 'com.slayernavigation'
+group = 'com.slayersimplified'
 version = '1.0.0'
 
 tasks.withType(JavaCompile).configureEach {
