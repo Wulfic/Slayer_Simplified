@@ -10,15 +10,18 @@ import net.runelite.client.ui.ColorScheme;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
+import java.awt.event.MouseWheelEvent;
 
 /**
  * Utility to apply a narrow, dark-themed scrollbar to JScrollPane instances.
+ * Also consumes mouse wheel events so they never propagate to the RuneLite
+ * game canvas (which would cause unwanted camera zoom).
  */
 public final class ScrollBarStyling
 {
-    private static final int SCROLLBAR_WIDTH = 8;
-    private static final Color THUMB_COLOR = new Color(80, 80, 80);
-    private static final Color THUMB_HOVER_COLOR = new Color(100, 100, 100);
+    private static final int SCROLLBAR_WIDTH = 10;
+    private static final Color THUMB_COLOR = new Color(100, 100, 100);
+    private static final Color THUMB_HOVER_COLOR = new Color(130, 130, 130);
     private static final Color TRACK_COLOR = ColorScheme.DARKER_GRAY_COLOR;
 
     private ScrollBarStyling() {}
@@ -80,5 +83,14 @@ public final class ScrollBarStyling
                 return btn;
             }
         });
+
+        // Always consume mouse wheel events on styled scroll panes so they
+        // never bubble up to the RuneLite game canvas and cause camera zoom.
+        scrollPane.addMouseWheelListener(ScrollBarStyling::consumeMouseWheel);
+    }
+
+    private static void consumeMouseWheel(MouseWheelEvent e)
+    {
+        e.consume();
     }
 }

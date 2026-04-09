@@ -24,6 +24,7 @@ import okhttp3.OkHttpClient;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseWheelEvent;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -102,6 +103,18 @@ public class MainPanel extends PluginPanel
         add(quickNavButton, BorderLayout.NORTH);
         add(currentPanelContainer, BorderLayout.CENTER);
         showPanel(Panel.TASK_SEARCH);
+
+        // Catch-all: consume any mouse wheel events that bubble up from child
+        // components without their own scroll handling (e.g. WikiTab, tab headers).
+        // This prevents events from reaching the RuneLite game canvas and
+        // triggering unwanted camera zoom.
+        addMouseWheelListener(MainPanel::consumeMouseWheel);
+        currentPanelContainer.addMouseWheelListener(MainPanel::consumeMouseWheel);
+    }
+
+    private static void consumeMouseWheel(MouseWheelEvent e)
+    {
+        e.consume();
     }
 
     public void shutDown()

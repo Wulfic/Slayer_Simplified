@@ -32,6 +32,9 @@ public class WikiTab extends JPanel implements Tab<WikiLink[]>
     {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
+        // Consume mouse wheel events so they don't propagate to the game canvas
+        addMouseWheelListener(e -> e.consume());
     }
 
     @Override
