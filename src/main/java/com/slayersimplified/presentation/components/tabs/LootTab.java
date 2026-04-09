@@ -45,11 +45,11 @@ public class LootTab extends JScrollPane implements Tab<String>
 
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        contentPanel.setBorder(new EmptyBorder(0, 0, 0, 12));
 
         setViewportView(contentPanel);
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
         setBorder(null);
-        getViewport().setBorder(new EmptyBorder(0, 0, 0, 12));
         getVerticalScrollBar().setUnitIncrement(16);
         setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
         setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
