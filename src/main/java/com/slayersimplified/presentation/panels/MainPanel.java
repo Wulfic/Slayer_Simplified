@@ -220,8 +220,18 @@ public class MainPanel extends PluginPanel
         {
             currentPanelContainer.removeAll();
             currentPanelContainer.add(panels.get(panel), BorderLayout.CENTER);
-            revalidate();
-            repaint();
+            currentPanelContainer.revalidate();
+            currentPanelContainer.repaint();
+
+            // Force the full component tree to lay out immediately so that
+            // nested JScrollPanes (LootTab, InfoTab, etc.) get correct sizes
+            // and their scrollbars appear without requiring a manual resize.
+            Window window = SwingUtilities.getWindowAncestor(this);
+            if (window != null)
+            {
+                window.revalidate();
+                window.repaint();
+            }
         });
     }
 }

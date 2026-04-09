@@ -51,6 +51,7 @@ public class LootTab extends JScrollPane implements Tab<String>
         setBorder(null);
         getVerticalScrollBar().setUnitIncrement(16);
         setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+        setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
         ScrollBarStyling.apply(this);
     }
 
@@ -90,9 +91,14 @@ public class LootTab extends JScrollPane implements Tab<String>
                         contentPanel.revalidate();
                         contentPanel.repaint();
                         revalidate();
+                        repaint();
 
-                        // Scroll to top
-                        SwingUtilities.invokeLater(() -> getVerticalScrollBar().setValue(0));
+                        // Scroll to top after layout settles
+                        SwingUtilities.invokeLater(() ->
+                        {
+                            getVerticalScrollBar().setValue(0);
+                            revalidate();
+                        });
                     });
                 });
     }

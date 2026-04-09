@@ -8,6 +8,7 @@ package com.slayersimplified.presentation.panels;
 
 import com.slayersimplified.domain.Task;
 import com.slayersimplified.presentation.SlayerTaskRenderer;
+import com.slayersimplified.presentation.components.ScrollBarStyling;
 import com.slayersimplified.presentation.components.SearchBar;
 import com.slayersimplified.presentation.components.SelectList;
 
@@ -35,8 +36,18 @@ public class TaskSearchPanel extends JPanel
         setLayout(new BorderLayout());
         setBackground(ColorScheme.DARK_GRAY_COLOR);
 
+        // Wrap the list in a JScrollPane so it scrolls properly and
+        // mouse wheel events don't leak to the game canvas.
+        JScrollPane listScroll = new JScrollPane(selectList);
+        listScroll.setBorder(null);
+        listScroll.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        listScroll.getViewport().setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        listScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        listScroll.getVerticalScrollBar().setUnitIncrement(16);
+        ScrollBarStyling.apply(listScroll);
+
         add(searchBar, BorderLayout.NORTH);
-        add(selectList, BorderLayout.CENTER);
+        add(listScroll, BorderLayout.CENTER);
     }
 
     public void shutDown()

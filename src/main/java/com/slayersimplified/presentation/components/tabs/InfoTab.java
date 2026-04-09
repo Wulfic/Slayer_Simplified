@@ -58,6 +58,7 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
         setBorder(null);
         getVerticalScrollBar().setUnitIncrement(16);
         setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+        setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
         ScrollBarStyling.apply(this);
     }
 
