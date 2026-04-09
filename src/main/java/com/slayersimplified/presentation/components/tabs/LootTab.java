@@ -24,7 +24,7 @@ import java.text.NumberFormat;
 public class LootTab extends JScrollPane implements Tab<String>
 {
     private final OkHttpClient okHttpClient;
-    private final JPanel contentPanel = new JPanel();
+    private final JPanel contentPanel = new ScrollablePanel();
     private String currentMonster;
 
     private static final Color SECTION_HEADER_BG = ColorScheme.DARKER_GRAY_COLOR.darker();
@@ -45,7 +45,6 @@ public class LootTab extends JScrollPane implements Tab<String>
 
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        contentPanel.setBorder(new EmptyBorder(0, 0, 0, 12));
 
         setViewportView(contentPanel);
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -270,5 +269,42 @@ public class LootTab extends JScrollPane implements Tab<String>
             if (item.getRarity() <= 0.01) return RARITY_RARE;
         }
         return RARITY_COMMON;
+    }
+
+    /**
+     * A JPanel that implements Scrollable to always match the viewport width,
+     * preventing content from extending under the scrollbar.
+     */
+    private static class ScrollablePanel extends JPanel implements Scrollable
+    {
+        @Override
+        public Dimension getPreferredScrollableViewportSize()
+        {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction)
+        {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction)
+        {
+            return visibleRect.height;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth()
+        {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight()
+        {
+            return false;
+        }
     }
 }
