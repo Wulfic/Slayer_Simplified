@@ -65,9 +65,20 @@ public class TaskTabs extends JTabbedPane
             @Override
             protected int calculateTabWidth(int tabPlacement, int tabIndex, FontMetrics metrics)
             {
-                return getWidth() / getTabCount();
+                int tabCount = getTabCount();
+                if (tabCount == 0)
+                {
+                    return super.calculateTabWidth(tabPlacement, tabIndex, metrics);
+                }
+                int totalWidth = TaskTabs.this.getWidth();
+                if (totalWidth <= 0)
+                {
+                    totalWidth = 225; // RuneLite sidebar default width
+                }
+                return Math.max(totalWidth / tabCount, 1);
             }
         });
+        setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
         TabKey locations = TabKey.LOCATIONS;
         TabKey info = TabKey.INFO;

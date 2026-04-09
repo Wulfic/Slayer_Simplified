@@ -8,6 +8,10 @@ A RuneLite plugin that combines a slayer task assistant with one-click navigatio
 - Searchable list of 100+ slayer monsters with icons
 - Select a monster to view its locations, loot, combat info, and more
 
+### Target Highlighting
+- Highlights the current task monster for easy identification
+- Customizable highlight color and style in settings
+
 ### Navigation
 - One-click **Nav** buttons on every mapped location to draw a path via Shortest Path's PluginMessage API
 - 194 location-to-coordinate mappings (dungeons use overworld entrance coords so Shortest Path handles routing)

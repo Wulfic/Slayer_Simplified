@@ -42,16 +42,6 @@ public class NotesTab extends JPanel implements Tab<String>
         headerLabel.setForeground(ColorScheme.BRAND_ORANGE);
         headerPanel.add(headerLabel, BorderLayout.WEST);
 
-        // Clear button
-        JButton clearButton = new JButton("Clear");
-        clearButton.setFont(FontManager.getRunescapeSmallFont());
-        clearButton.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        clearButton.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-        clearButton.setFocusPainted(false);
-        clearButton.setBorder(new EmptyBorder(2, 8, 2, 8));
-        clearButton.addActionListener(e -> clearNotes());
-        headerPanel.add(clearButton, BorderLayout.EAST);
-
         add(headerPanel, BorderLayout.NORTH);
 
         // Text area for notes
@@ -121,11 +111,5 @@ public class NotesTab extends JPanel implements Tab<String>
             return;
         }
         notesService.setNotes(currentMonster, textArea.getText());
-    }
-
-    private void clearNotes()
-    {
-        textArea.setText("");
-        // saveNotes() will be triggered by the document listener
     }
 }
