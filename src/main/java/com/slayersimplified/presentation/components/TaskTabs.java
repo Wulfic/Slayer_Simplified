@@ -80,7 +80,7 @@ public class TaskTabs extends JTabbedPane
         infoTab = new InfoTab(okHttpClient);
 
         setTab(locations, Icon.COMPASS.getIcon(), locationsTab, locations.getName());
-        setTab(info, Icon.INVENTORY.getIcon(), infoTab, info.getName());
+        setTab(info, Icon.SLAYER_SKILL.getIcon(), infoTab, info.getName());
         setTab(loot, Icon.LOOT.getIcon(), lootTab, loot.getName());
         setTab(notes, Icon.NOTES.getIcon(), new NotesTab(notesService), notes.getName());
         setTab(wiki, Icon.WIKI.getIcon(), new WikiTab(), wiki.getName());

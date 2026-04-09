@@ -9,6 +9,7 @@ import net.runelite.client.externalplugins.ExternalPluginManager;
  */
 public class SlayerSimplifiedPluginTest
 {
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception
 	{
 		ExternalPluginManager.loadBuiltin(SlayerSimplifiedPlugin.class);

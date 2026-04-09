@@ -1,6 +1,6 @@
 # Slayer Simplified
 
-A RuneLite plugin that combines a slayer task assistant with one-click navigation via the [Shortest Path](https://github.com/Skretzo/shortest-path) plugin. Browse monsters, view drop tables and combat stats from the OSRS Wiki, manage favorite locations, take personal notes, and navigate to any task location — all from a single panel.
+A RuneLite plugin that combines a slayer task assistant with one-click navigation via the [Shortest Path](https://github.com/Skretzo/shortest-path) plugin. Browse monsters, view drop tables and combat stats from the OSRS Wiki, manage favorite locations, take personal notes, and navigate to any task location — all from a single panel. When you type !task in-game, the plugin automatically detects your current slayer assignment and provides a quick Nav button to your task location. If no task is active, it will navigate to your slayer master instead. Whether you're a beginner or a seasoned slayer, Slayer Simplified streamlines your workflow and keeps all the essential information at your fingertips.
 
 ## Features
 

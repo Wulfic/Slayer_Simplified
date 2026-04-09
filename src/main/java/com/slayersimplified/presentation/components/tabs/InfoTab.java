@@ -43,6 +43,8 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
 
     private static final Color SECTION_HEADER_BG = ColorScheme.DARKER_GRAY_COLOR.darker();
     private static final Color STAT_VALUE_COLOR = Color.WHITE;
+    private static final Font SECTION_FONT = FontManager.getRunescapeSmallFont().deriveFont(Font.BOLD);
+    private static final Font BODY_FONT = FontManager.getRunescapeSmallFont();
 
     public InfoTab(OkHttpClient okHttpClient)
     {
@@ -242,7 +244,7 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
         header.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JLabel label = new JLabel("\u25BC " + title);
-        label.setFont(FontManager.getRunescapeBoldFont());
+        label.setFont(SECTION_FONT);
         label.setForeground(ColorScheme.BRAND_ORANGE);
         header.add(label, BorderLayout.WEST);
 
@@ -298,7 +300,7 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
         panel.setBorder(new EmptyBorder(4, 8, 4, 4));
 
         JLabel label = new JLabel(text);
-        label.setFont(FontManager.getRunescapeBoldFont());
+        label.setFont(SECTION_FONT);
         label.setForeground(ColorScheme.BRAND_ORANGE);
         panel.add(label, BorderLayout.WEST);
 
@@ -309,11 +311,11 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
     {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
         panel.setBorder(new EmptyBorder(3, 12, 2, 4));
 
         JLabel label = new JLabel(text);
-        label.setFont(FontManager.getRunescapeBoldFont());
+        label.setFont(SECTION_FONT);
         label.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
         panel.add(label, BorderLayout.WEST);
 
@@ -324,11 +326,11 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
     {
         JPanel row = new JPanel(new BorderLayout());
         row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
         row.setBorder(new EmptyBorder(2, 16, 2, 4));
 
         JLabel label = new JLabel(text);
-        label.setFont(FontManager.getRunescapeSmallFont());
+        label.setFont(BODY_FONT);
         label.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
         row.add(label, BorderLayout.WEST);
 
@@ -344,16 +346,16 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
 
         JPanel row = new JPanel(new BorderLayout());
         row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
         row.setBorder(new EmptyBorder(2, 16, 2, 8));
 
         JLabel nameLabel = new JLabel(label);
-        nameLabel.setFont(FontManager.getRunescapeSmallFont());
+        nameLabel.setFont(BODY_FONT);
         nameLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
         row.add(nameLabel, BorderLayout.CENTER);
 
         JLabel valueLabel = new JLabel(value);
-        valueLabel.setFont(FontManager.getRunescapeBoldFont());
+        valueLabel.setFont(SECTION_FONT);
         valueLabel.setForeground(STAT_VALUE_COLOR);
         row.add(valueLabel, BorderLayout.EAST);
 
@@ -369,11 +371,11 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
 
         JPanel row = new JPanel(new BorderLayout());
         row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
         row.setBorder(new EmptyBorder(2, 20, 2, 8));
 
         JLabel nameLabel = new JLabel(label);
-        nameLabel.setFont(FontManager.getRunescapeSmallFont());
+        nameLabel.setFont(BODY_FONT);
         nameLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
         row.add(nameLabel, BorderLayout.CENTER);
 
@@ -384,7 +386,7 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
                 : isNotImmune ? new Color(100, 200, 100) : ColorScheme.LIGHT_GRAY_COLOR;
 
         JLabel valueLabel = new JLabel(value);
-        valueLabel.setFont(FontManager.getRunescapeSmallFont());
+        valueLabel.setFont(BODY_FONT);
         valueLabel.setForeground(valueColor);
         row.add(valueLabel, BorderLayout.EAST);
 
