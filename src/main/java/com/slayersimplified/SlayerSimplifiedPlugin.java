@@ -159,6 +159,11 @@ public class SlayerSimplifiedPlugin extends Plugin
                 String message = Text.removeTags(rawMsg).trim();
                 if (message.equalsIgnoreCase("!task"))
                 {
+                    if (!config.autoNavigate())
+                    {
+                        return;
+                    }
+
                     // Set flag so the GAMEMESSAGE response triggers navigation
                     pendingTaskNavigation = true;
 

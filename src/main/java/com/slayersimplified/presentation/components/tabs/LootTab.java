@@ -49,6 +49,7 @@ public class LootTab extends JScrollPane implements Tab<String>
         setViewportView(contentPanel);
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
         setBorder(null);
+        getViewport().setBorder(new EmptyBorder(0, 0, 0, 12));
         getVerticalScrollBar().setUnitIncrement(16);
         setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
         setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -182,7 +183,7 @@ public class LootTab extends JScrollPane implements Tab<String>
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(SECTION_HEADER_BG);
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
-        panel.setBorder(new EmptyBorder(4, 8, 4, 14));
+        panel.setBorder(new EmptyBorder(4, 8, 4, 4));
 
         JLabel label = new JLabel(text);
         label.setFont(FontManager.getRunescapeBoldFont());
@@ -196,7 +197,7 @@ public class LootTab extends JScrollPane implements Tab<String>
     {
         JPanel row = new JPanel(new BorderLayout(4, 0));
         row.setBackground(alt ? ITEM_BG_ALT : ITEM_BG);
-        row.setBorder(new EmptyBorder(3, 8, 3, 14));
+        row.setBorder(new EmptyBorder(3, 8, 3, 4));
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
 
         // Left: name + quantity

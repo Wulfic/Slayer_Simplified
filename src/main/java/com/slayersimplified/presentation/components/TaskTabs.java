@@ -76,7 +76,10 @@ public class TaskTabs extends JTabbedPane
                 {
                     totalWidth = 225;
                 }
-                return totalWidth / tabCount;
+                // Account for tab run insets so all tabs fit in one row
+                Insets tabInsets = getTabAreaInsets(tabPlacement);
+                int usable = totalWidth - tabInsets.left - tabInsets.right;
+                return usable / tabCount;
             }
         });
 
@@ -92,7 +95,7 @@ public class TaskTabs extends JTabbedPane
 
         setTab(locations, Icon.COMPASS.getIcon(), locationsTab, locations.getName());
         setTab(info, Icon.SLAYER_SKILL.getIcon(), infoTab, info.getName());
-        setTab(loot, Icon.LOOT.getIcon(), lootTab, loot.getName());
+        setTab(loot, Icon.INVENTORY.getIcon(), lootTab, loot.getName());
         setTab(notes, Icon.NOTES.getIcon(), new NotesTab(notesService), notes.getName());
         setTab(wiki, Icon.WIKI.getIcon(), new WikiTab(), wiki.getName());
     }
