@@ -6,9 +6,12 @@
 package com.slayersimplified;
 
 import com.slayersimplified.domain.SlayerMaster;
+import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+
+import java.awt.Color;
 
 /**
  * Plugin configuration for Slayer Simplified. Exposes settings in
@@ -28,6 +31,29 @@ public interface SlayerSimplifiedConfig extends Config
     default SlayerMaster preferredMaster()
     {
         return SlayerMaster.DURADEL;
+    }
+
+    @ConfigItem(
+            keyName = "highlightTarget",
+            name = "Highlight Target",
+            description = "Draw an outline around your current slayer task NPCs",
+            position = 2
+    )
+    default boolean highlightTarget()
+    {
+        return true;
+    }
+
+    @Alpha
+    @ConfigItem(
+            keyName = "highlightColor",
+            name = "Highlight Color",
+            description = "Color of the target NPC outline",
+            position = 3
+    )
+    default Color highlightColor()
+    {
+        return Color.RED;
     }
 
     // Hidden config keys used to persist internal state across sessions

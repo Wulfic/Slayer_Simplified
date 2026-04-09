@@ -16,6 +16,7 @@ import com.google.inject.Provides;
 import com.slayersimplified.domain.Icon;
 import com.slayersimplified.modules.TaskServiceModule;
 import com.slayersimplified.presentation.panels.MainPanel;
+import com.slayersimplified.presentation.SlayerTargetOverlay;
 import com.slayersimplified.services.SlayerTaskTracker;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
@@ -28,6 +29,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
@@ -55,6 +57,12 @@ public class SlayerSimplifiedPlugin extends Plugin
 
     @Inject
     private SlayerTaskTracker taskTracker;
+
+    @Inject
+    private OverlayManager overlayManager;
+
+    @Inject
+    private SlayerTargetOverlay targetOverlay;
 
     private NavigationButton navButton;
 
@@ -84,6 +92,7 @@ public class SlayerSimplifiedPlugin extends Plugin
                 .build();
 
         clientToolbar.addNavigation(navButton);
+        overlayManager.add(targetOverlay);
         log.info("Slayer Simplified started");
     }
 
@@ -91,6 +100,7 @@ public class SlayerSimplifiedPlugin extends Plugin
     protected void shutDown()
     {
         clientToolbar.removeNavigation(navButton);
+        overlayManager.remove(targetOverlay);
         mainPanel.shutDown();
         log.info("Slayer Simplified stopped");
     }
