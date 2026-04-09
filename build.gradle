@@ -23,7 +23,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
 	// Jsoup for OSRS Wiki HTML parsing (loot table scraping)
-	implementation 'org.jsoup:jsoup:1.17.2'
+	implementation 'org.jsoup:jsoup:1.13.1'
 
 	testImplementation 'junit:junit:4.13.2'
 	testImplementation group: 'net.runelite', name: 'client', version: runeLiteVersion
