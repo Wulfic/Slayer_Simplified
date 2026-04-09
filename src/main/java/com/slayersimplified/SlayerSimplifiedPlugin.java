@@ -59,6 +59,9 @@ public class SlayerSimplifiedPlugin extends Plugin
     private SlayerTaskTracker taskTracker;
 
     @Inject
+    private SlayerSimplifiedConfig config;
+
+    @Inject
     private OverlayManager overlayManager;
 
     @Inject
@@ -121,13 +124,19 @@ public class SlayerSimplifiedPlugin extends Plugin
             if (result == SlayerTaskTracker.ParseResult.NEW_TASK)
             {
                 pendingTaskNavigation = false;
-                SwingUtilities.invokeLater(() -> mainPanel.quickNavigate());
+                if (config.autoNavigate())
+                {
+                    SwingUtilities.invokeLater(() -> mainPanel.quickNavigate());
+                }
             }
             // When game responds to !task with current task info, navigate now
             else if (result == SlayerTaskTracker.ParseResult.CURRENT_TASK && pendingTaskNavigation)
             {
                 pendingTaskNavigation = false;
-                SwingUtilities.invokeLater(() -> mainPanel.quickNavigate());
+                if (config.autoNavigate())
+                {
+                    SwingUtilities.invokeLater(() -> mainPanel.quickNavigate());
+                }
             }
             return;
         }

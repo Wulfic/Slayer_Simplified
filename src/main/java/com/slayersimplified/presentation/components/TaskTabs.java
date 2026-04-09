@@ -60,6 +60,7 @@ public class TaskTabs extends JTabbedPane
             MonsterNotesService notesService)
     {
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
         setUI(new RuneLiteTabbedPaneUI()
         {
             @Override
@@ -73,12 +74,11 @@ public class TaskTabs extends JTabbedPane
                 int totalWidth = TaskTabs.this.getWidth();
                 if (totalWidth <= 0)
                 {
-                    totalWidth = 225; // RuneLite sidebar default width
+                    totalWidth = 225;
                 }
-                return Math.max(totalWidth / tabCount, 1);
+                return totalWidth / tabCount;
             }
         });
-        setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
         TabKey locations = TabKey.LOCATIONS;
         TabKey info = TabKey.INFO;

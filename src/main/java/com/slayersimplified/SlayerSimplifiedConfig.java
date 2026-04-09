@@ -56,6 +56,17 @@ public interface SlayerSimplifiedConfig extends Config
         return Color.RED;
     }
 
+    @ConfigItem(
+            keyName = "autoNavigate",
+            name = "Auto Navigate (!task)",
+            description = "Automatically navigate to your slayer task when typing !task or receiving a new assignment",
+            position = 4
+    )
+    default boolean autoNavigate()
+    {
+        return true;
+    }
+
     // Hidden config keys used to persist internal state across sessions
 
     @ConfigItem(
