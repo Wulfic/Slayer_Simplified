@@ -251,7 +251,7 @@ public class LootTab extends JScrollPane implements Tab<String>
             rightPanel.add(priceLabel);
         }
 
-        row.add(leftPanel, BorderLayout.WEST);
+        row.add(leftPanel, BorderLayout.CENTER);
         row.add(rightPanel, BorderLayout.EAST);
 
         // Tooltip with full info

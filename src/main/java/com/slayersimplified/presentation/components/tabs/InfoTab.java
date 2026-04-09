@@ -22,6 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * Scrollable tab combining Items Required, Wiki Combat Stats, and Slayer Masters
@@ -34,8 +36,8 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
     private final JPanel contentPanel = new JPanel();
     private final OkHttpClient okHttpClient;
 
-    /** Placeholder panel that gets replaced when wiki data arrives. */
-    private final JPanel wikiCombatPanel = new JPanel();
+    /** Collapsible body panel for Wiki Combat Stats (populated asynchronously). */
+    private JPanel wikiBodyPanel;
 
     private String currentMonster;
 
@@ -48,9 +50,6 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
 
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-
-        wikiCombatPanel.setLayout(new BoxLayout(wikiCombatPanel, BoxLayout.Y_AXIS));
-        wikiCombatPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
         setViewportView(contentPanel);
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -67,24 +66,24 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
     {
         contentPanel.removeAll();
 
-        // -- Items Required section --
-        addSectionHeader("Items Required");
+        // -- Items Required section (collapsible) --
+        JPanel itemsBody = addCollapsibleSection(contentPanel, "Items Required");
         if (data.items == null || data.items.length == 0)
         {
-            addTextRow("None");
+            addTextRowTo(itemsBody, "None");
         }
         else
         {
             for (String item : data.items)
             {
-                addTextRow(StringUtils.capitalize(item));
+                addTextRowTo(itemsBody, StringUtils.capitalize(item));
             }
         }
 
         contentPanel.add(Box.createRigidArea(new Dimension(0, 6)));
 
-        // -- Combat section (from task data) --
-        addSectionHeader("Combat");
+        // -- Combat section (collapsible) --
+        JPanel combatBody = addCollapsibleSection(contentPanel, "Combat");
         if (data.combat != null && data.combat.length == 2)
         {
             Object[] attackStyles = data.combat[0];
@@ -92,53 +91,51 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
 
             if (attackStyles.length > 0)
             {
-                addSubHeader("Attack Styles");
+                addSubHeaderTo(combatBody, "Attack Styles");
                 for (Object style : attackStyles)
                 {
-                    addTextRow(style.toString());
+                    addTextRowTo(combatBody, style.toString());
                 }
             }
 
             if (attributes.length > 0)
             {
-                addSubHeader("Attributes");
+                addSubHeaderTo(combatBody, "Attributes");
                 for (Object attr : attributes)
                 {
-                    addTextRow(attr.toString());
+                    addTextRowTo(combatBody, attr.toString());
                 }
             }
 
             if (attackStyles.length == 0 && attributes.length == 0)
             {
-                addTextRow("None");
+                addTextRowTo(combatBody, "None");
             }
         }
         else
         {
-            addTextRow("None");
+            addTextRowTo(combatBody, "None");
         }
 
         contentPanel.add(Box.createRigidArea(new Dimension(0, 6)));
 
-        // -- Wiki Combat Stats placeholder --
-        wikiCombatPanel.removeAll();
-        addSectionHeaderTo(wikiCombatPanel, "Wiki Combat Stats");
-        addTextRowTo(wikiCombatPanel, "Loading...");
-        contentPanel.add(wikiCombatPanel);
+        // -- Wiki Combat Stats (collapsible, async) --
+        wikiBodyPanel = addCollapsibleSection(contentPanel, "Wiki Combat Stats");
+        addTextRowTo(wikiBodyPanel, "Loading...");
 
         contentPanel.add(Box.createRigidArea(new Dimension(0, 6)));
 
-        // -- Masters section --
-        addSectionHeader("Slayer Masters");
+        // -- Masters section (collapsible) --
+        JPanel mastersBody = addCollapsibleSection(contentPanel, "Slayer Masters");
         if (data.masters == null || data.masters.length == 0)
         {
-            addTextRow("None");
+            addTextRowTo(mastersBody, "None");
         }
         else
         {
             for (String master : data.masters)
             {
-                addTextRow(StringUtils.capitalize(master));
+                addTextRowTo(mastersBody, StringUtils.capitalize(master));
             }
         }
 
@@ -165,28 +162,32 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
 
     private void populateWikiCombatStats(CombatStats stats)
     {
-        wikiCombatPanel.removeAll();
-        addSectionHeaderTo(wikiCombatPanel, "Wiki Combat Stats");
+        if (wikiBodyPanel == null)
+        {
+            return;
+        }
+
+        wikiBodyPanel.removeAll();
 
         if (stats == null || stats.getCombatLevel().isEmpty())
         {
-            addTextRowTo(wikiCombatPanel, "No data found.");
-            wikiCombatPanel.revalidate();
-            wikiCombatPanel.repaint();
+            addTextRowTo(wikiBodyPanel, "No data found.");
+            wikiBodyPanel.revalidate();
+            wikiBodyPanel.repaint();
             contentPanel.revalidate();
             revalidate();
             return;
         }
 
         // Core stats
-        addStatRow(wikiCombatPanel, "Combat Level", stats.getCombatLevel());
-        addStatRow(wikiCombatPanel, "Hitpoints", stats.getHitpoints());
-        addStatRow(wikiCombatPanel, "Max Hit", stats.getMaxHit());
-        addStatRow(wikiCombatPanel, "Attack Style", stats.getAttackStyle());
+        addStatRow(wikiBodyPanel, "Combat Level", stats.getCombatLevel());
+        addStatRow(wikiBodyPanel, "Hitpoints", stats.getHitpoints());
+        addStatRow(wikiBodyPanel, "Max Hit", stats.getMaxHit());
+        addStatRow(wikiBodyPanel, "Attack Style", stats.getAttackStyle());
 
         if (!stats.getAttribute().isEmpty())
         {
-            addStatRow(wikiCombatPanel, "Attribute", stats.getAttribute());
+            addStatRow(wikiBodyPanel, "Attribute", stats.getAttribute());
         }
 
         // Weakness
@@ -197,19 +198,19 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
             {
                 weakness += " (" + stats.getElementalWeaknessPercent() + ")";
             }
-            addStatRow(wikiCombatPanel, "Weakness", weakness);
+            addStatRow(wikiBodyPanel, "Weakness", weakness);
         }
 
         // Immunities
-        addSubHeaderTo(wikiCombatPanel, "Immunities");
-        addImmunityRow(wikiCombatPanel, "Poison", stats.getImmunePoison());
-        addImmunityRow(wikiCombatPanel, "Venom", stats.getImmuneVenom());
-        addImmunityRow(wikiCombatPanel, "Cannons", stats.getImmuneCannon());
-        addImmunityRow(wikiCombatPanel, "Thralls", stats.getImmuneThrall());
-        addImmunityRow(wikiCombatPanel, "Burn", stats.getImmuneBurn());
+        addSubHeaderTo(wikiBodyPanel, "Immunities");
+        addImmunityRow(wikiBodyPanel, "Poison", stats.getImmunePoison());
+        addImmunityRow(wikiBodyPanel, "Venom", stats.getImmuneVenom());
+        addImmunityRow(wikiBodyPanel, "Cannons", stats.getImmuneCannon());
+        addImmunityRow(wikiBodyPanel, "Thralls", stats.getImmuneThrall());
+        addImmunityRow(wikiBodyPanel, "Burn", stats.getImmuneBurn());
 
-        wikiCombatPanel.revalidate();
-        wikiCombatPanel.repaint();
+        wikiBodyPanel.revalidate();
+        wikiBodyPanel.repaint();
         contentPanel.revalidate();
         revalidate();
     }
@@ -219,6 +220,55 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
     {
         contentPanel.removeAll();
         currentMonster = null;
+    }
+
+    // ---- Collapsible section helper ----
+
+    /**
+     * Creates a collapsible section with a clickable header and returns the body panel.
+     * Clicking the header toggles the visibility of the body content.
+     */
+    private JPanel addCollapsibleSection(JPanel target, String title)
+    {
+        JPanel wrapper = new JPanel();
+        wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
+        wrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
+        // Header
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(SECTION_HEADER_BG);
+        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
+        header.setBorder(new EmptyBorder(4, 8, 4, 4));
+        header.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        JLabel label = new JLabel("\u25BC " + title);
+        label.setFont(FontManager.getRunescapeBoldFont());
+        label.setForeground(ColorScheme.BRAND_ORANGE);
+        header.add(label, BorderLayout.WEST);
+
+        // Body
+        JPanel body = new JPanel();
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+        body.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
+        header.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mouseClicked(MouseEvent e)
+            {
+                boolean visible = !body.isVisible();
+                body.setVisible(visible);
+                label.setText((visible ? "\u25BC " : "\u25B6 ") + title);
+                contentPanel.revalidate();
+                contentPanel.repaint();
+            }
+        });
+
+        wrapper.add(header);
+        wrapper.add(body);
+        target.add(wrapper);
+
+        return body;
     }
 
     // ---- Helpers that add to contentPanel ----
@@ -300,7 +350,7 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
         JLabel nameLabel = new JLabel(label);
         nameLabel.setFont(FontManager.getRunescapeSmallFont());
         nameLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-        row.add(nameLabel, BorderLayout.WEST);
+        row.add(nameLabel, BorderLayout.CENTER);
 
         JLabel valueLabel = new JLabel(value);
         valueLabel.setFont(FontManager.getRunescapeBoldFont());
@@ -325,7 +375,7 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
         JLabel nameLabel = new JLabel(label);
         nameLabel.setFont(FontManager.getRunescapeSmallFont());
         nameLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-        row.add(nameLabel, BorderLayout.WEST);
+        row.add(nameLabel, BorderLayout.CENTER);
 
         // Color-code: green for immune, red-ish for not immune
         boolean isImmune = value.toLowerCase().startsWith("immune");
