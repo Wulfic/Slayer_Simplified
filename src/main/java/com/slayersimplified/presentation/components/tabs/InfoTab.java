@@ -39,8 +39,6 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
     /** Collapsible body panel for Wiki Combat Stats (populated asynchronously). */
     private JPanel wikiBodyPanel;
 
-    private String currentMonster;
-
     private static final Color SECTION_HEADER_BG = ColorScheme.DARKER_GRAY_COLOR.darker();
     private static final Color STAT_VALUE_COLOR = Color.WHITE;
     private static final Font SECTION_FONT = FontManager.getRunescapeSmallFont().deriveFont(Font.BOLD);
@@ -150,7 +148,6 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
         // Fetch wiki combat stats asynchronously (cached after first lookup)
         if (data.monsterName != null && !data.monsterName.isEmpty())
         {
-            currentMonster = data.monsterName;
             fetchCombatStats(data.monsterName);
         }
     }
@@ -221,7 +218,6 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
     public void shutDown()
     {
         contentPanel.removeAll();
-        currentMonster = null;
     }
 
     // ---- Collapsible section helper ----
@@ -273,39 +269,7 @@ public class InfoTab extends JScrollPane implements Tab<InfoTab.InfoData>
         return body;
     }
 
-    // ---- Helpers that add to contentPanel ----
-
-    private void addSectionHeader(String text)
-    {
-        addSectionHeaderTo(contentPanel, text);
-    }
-
-    private void addSubHeader(String text)
-    {
-        addSubHeaderTo(contentPanel, text);
-    }
-
-    private void addTextRow(String text)
-    {
-        addTextRowTo(contentPanel, text);
-    }
-
     // ---- Helpers that add to an arbitrary panel ----
-
-    private void addSectionHeaderTo(JPanel target, String text)
-    {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(SECTION_HEADER_BG);
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
-        panel.setBorder(new EmptyBorder(4, 8, 4, 4));
-
-        JLabel label = new JLabel(text);
-        label.setFont(SECTION_FONT);
-        label.setForeground(ColorScheme.BRAND_ORANGE);
-        panel.add(label, BorderLayout.WEST);
-
-        target.add(panel);
-    }
 
     private void addSubHeaderTo(JPanel target, String text)
     {

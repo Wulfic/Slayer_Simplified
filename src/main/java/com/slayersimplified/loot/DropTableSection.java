@@ -1,3 +1,10 @@
+/*
+ * BSD 2-Clause License
+ * Copyright (c) 2026, Slayer Simplified contributors
+ * See LICENSE for details.
+ *
+ * Ported from loot-lookup-plugin by donth77.
+ */
 package com.slayersimplified.loot;
 
 import java.util.Map;

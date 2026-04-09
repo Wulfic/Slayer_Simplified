@@ -1,3 +1,8 @@
+/*
+ * BSD 2-Clause License
+ * Copyright (c) 2026, Slayer Simplified contributors
+ * See LICENSE for details.
+ */
 package com.slayersimplified.presentation;
 
 import com.slayersimplified.SlayerSimplifiedConfig;
@@ -9,7 +14,6 @@ import net.runelite.api.NPC;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
 
 import javax.inject.Inject;

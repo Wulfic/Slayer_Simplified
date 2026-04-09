@@ -1,3 +1,8 @@
+/*
+ * BSD 2-Clause License
+ * Copyright (c) 2026, Slayer Simplified contributors
+ * See LICENSE for details.
+ */
 package com.slayersimplified.presentation.components.tabs;
 
 import com.slayersimplified.domain.Tab;

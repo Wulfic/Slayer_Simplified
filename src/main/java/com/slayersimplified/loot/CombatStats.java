@@ -1,3 +1,8 @@
+/*
+ * BSD 2-Clause License
+ * Copyright (c) 2026, Slayer Simplified contributors
+ * See LICENSE for details.
+ */
 package com.slayersimplified.loot;
 
 import lombok.Value;

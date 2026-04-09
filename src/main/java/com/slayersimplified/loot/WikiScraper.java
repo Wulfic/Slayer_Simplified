@@ -1,3 +1,11 @@
+/*
+ * BSD 2-Clause License
+ * Copyright (c) 2026, Slayer Simplified contributors
+ * See LICENSE for details.
+ *
+ * Scrapes drop-table data and combat stats from the OSRS Wiki.
+ * Ported and adapted from the loot-lookup-plugin by donth77.
+ */
 package com.slayersimplified.loot;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +32,6 @@ public class WikiScraper
 {
     private static final String BASE_URL = "https://oldschool.runescape.wiki";
     private static final String BASE_WIKI_URL = BASE_URL + "/w/";
-    private static final String BASE_WIKI_LOOKUP_URL = BASE_WIKI_URL + "Special:Lookup";
     private static final String USER_AGENT = RuneLite.USER_AGENT + " (slayer-simplified)";
 
     /** In-memory cache for combat stats keyed by monster name. */
@@ -356,6 +363,7 @@ public class WikiScraper
         DropTableSection currDropTableSection = new DropTableSection();
         Map<String, WikiItem[]> currDropTable = new LinkedHashMap<>();
 
+        @SuppressWarnings("unused")
         boolean incrementH3Index = false;
 
         for (Element tableHeader : tableHeaders)
@@ -673,17 +681,13 @@ public class WikiScraper
             {
                 try (ResponseBody responseBody = response.body())
                 {
-                    if (!response.isSuccessful())
+                    if (!response.isSuccessful() || responseBody == null)
                     {
                         log.warn("HTTP request unsuccessful. Status code: {} for URL: {}", response.code(), url);
                         future.complete("");
                         return;
                     }
                     future.complete(responseBody.string());
-                }
-                finally
-                {
-                    response.close();
                 }
             }
         });

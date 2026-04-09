@@ -1,3 +1,8 @@
+/*
+ * BSD 2-Clause License
+ * Copyright (c) 2026, Slayer Simplified contributors
+ * See LICENSE for details.
+ */
 package com.slayersimplified.presentation.components.tabs;
 
 import com.slayersimplified.domain.Tab;
@@ -13,7 +18,6 @@ import okhttp3.OkHttpClient;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.text.NumberFormat;
 
 /**
  * Tab that displays the loot/drop table for a monster by scraping the OSRS Wiki.
@@ -36,8 +40,6 @@ public class LootTab extends JScrollPane implements Tab<String>
     private static final Color RARITY_RARE = ColorScheme.BRAND_ORANGE.brighter();
     private static final Color RARITY_SUPER_RARE = new Color(200, 50, 200);
     private static final Color PRICE_COLOR = ColorScheme.GRAND_EXCHANGE_ALCH;
-
-    private final NumberFormat nf = NumberFormat.getNumberInstance();
 
     public LootTab(OkHttpClient okHttpClient)
     {
